@@ -122,8 +122,13 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+CSRF_TRUSTED_ORIGINS = [
+    "https://bloomatelier-todo-app.onrender.com",
+]
+CORS_ALLOW_ALL_ORIGINS = True
 MEDIA_URL = 'media/'
 MEDIA_ROOT = 'media' 
+LOGIN_REDIRECT_URL = 'homep'
 
 STORAGES = {
     # ...

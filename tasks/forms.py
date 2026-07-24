@@ -4,18 +4,21 @@ from django.contrib.auth.models import User
 from .models import Task
 
 class TaskForm(forms.ModelForm):
-    due_time = forms.DateTimeField(widget=forms.DateTimeInput(attrs={'type':'datetime-local'}))
-    
+    due_time = forms.DateTimeField(widget=forms.DateTimeInput(attrs={'type': 'datetime-local'}))
+
     class Meta:
         model = Task
-        fields= ('title', 'done', 'due_time')
-        exclude = ('user',)
+        fields = ('title', 'done', 'due_time')
 
 
-        
-        
+class TaskCreateForm(forms.ModelForm):
+    due_time = forms.DateTimeField(widget=forms.DateTimeInput(attrs={'type': 'datetime-local'}))
+
+    class Meta:
+        model = Task
+        fields = ('title', 'due_time')
+
 class Registerform(UserCreationForm):
     class Meta:
         model = User
-        fields = ('username',  'password1', 'password2')
-        #'email',
+        fields = ('username', 'email', 'password1', 'password2')

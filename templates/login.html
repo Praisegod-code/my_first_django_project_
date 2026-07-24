@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+
 {% block content %}
 <form method="post">
     {% csrf_token %}
@@ -8,7 +9,19 @@
 
     <button type="submit">Login</button>
     <p>
-        Don't have account? <a href="{% url "register" %}">Sign Up</a>
+        Don't have account?  <a href="{% url "register" %}">Sign Up</a>
     </p>
 </form>
-{% endblock content  %}
+{% endblock %}
+
+{% comment %} {% block content %}
+<form method="post">
+    {% csrf_token %}
+    {{form.as_p}}
+    <button type="submit">Login</button>
+    <p><button><a href="{% url "register" %}">Sign Up</a></button></p>
+</form>   
+{% endblock %}  {% endcomment %}
+
+
+

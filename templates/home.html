@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-
 {% block content %}
 <div class="app">
+<script id="tasks-data" type="application/json">{{ task_data_json|safe }}</script>
   <header>
     <div class="eyebrow">Today</div>
     <p>{{ greeting }}</p>
@@ -9,18 +9,12 @@
     <p class="sub">Add a task, check it off when it's done. Nothing here leaves this page.</p>
   </header>
 
-  <form id="task-form">
-    <input id="task-input" type="text" placeholder="e.g. Reply to client email" autocomplete="off" maxlength="140">
-    <a type="submit" class="add">Add task</a>
-  </form>
-
   <div class="meta-row">
     <span id="count-label">{{ tasks.count }}</span>
     <div class="filters">
       <a href="{% url "home" %}" class="active">All</a>
       <a href="{% url "tasks" 'true'  %}">Done</a>
       <a href="{% url "tasks" 'false' %}">Not Done</a>
-
     </div>
   </div>
 
@@ -32,14 +26,19 @@
       <li class="item">
       {% endif %}
 
-      <span class="check" role="checkbox" aria-checked="{{task.done}}" tabindex="0">
-        <svg viewBox="0 0 22 22">
-      <circle cx="11" cy="11" r="9.3"></circle>
-      <path d="M6.5 11.5l3 3 6-6.5"></path>
-    </svg>
-      </span>
-       {{ task.title }} &nbsp;  <a href="{% url 'task' pk=task.id %}">Edit</a> &nbsp;&nbsp; <a href="{% url "delete" pk=task.id %}">Delete</a>
-      </li>
+<a href="{% url 'toggle_task' pk=task.id %}" class="check" role="checkbox" aria-checked="{{ task.done }}">
+  <svg viewBox="0 0 22 22">
+    <circle cx="11" cy="11" r="9.3"></circle>
+    <path d="M6.5 11.5l3 3 6-6.5"></path>
+  </svg>
+</a>
+
+      <span class="label">{{ task.title }}</span>
+<div class="actions">
+  <a href="{% url 'task' pk=task.id %}" class="edit-link">Edit</a>
+  <a href="{% url 'delete' pk=task.id %}" class="delete-link">Delete</a>
+</div>
+</li>
     {% endfor %}
   </ul>
   <div class="empty" id="empty-state" style="display:none;">
@@ -47,4 +46,48 @@
     <p>Type something above and press Add task.</p>
   </div>
 </div>
+
+<a href="{% url 'add_task' %}" class="add-fab" aria-label="Add task">+</a>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const tasks = JSON.parse(document.getElementById('tasks-data').textContent);
+  const notified = new Set();
+
+  if ('Notification' in window && Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+    Notification.requestPermission();
+  }
+
+  function checkReminders() {
+    if (Notification.permission !== 'granted') return;
+
+    const now = new Date();
+
+    tasks.forEach(task => {
+      if (task.done || !task.due_time) return;
+
+      const due = new Date(task.due_time);
+      const diffMinutes = (due - now) / 60000;
+
+      // Pre-reminder: 10 minutes before due
+      if (diffMinutes <= 10 && diffMinutes > 9 && !notified.has(task.id + '-pre')) {
+        new Notification('Upcoming task', { body: `"${task.title}" is due in 10 minutes` });
+        notified.add(task.id + '-pre');
+      }
+
+      // Due-now reminder
+      if (diffMinutes <= 0 && diffMinutes > -1 && !notified.has(task.id + '-due')) {
+        new Notification('Task due now', { body: `"${task.title}" is due now` });
+        notified.add(task.id + '-due');
+      }
+    });
+  }
+
+  checkReminders();
+  setInterval(checkReminders, 30000);
+});
+</script>
+
 {% endblock content %}
+
+
+
